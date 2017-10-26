@@ -40,12 +40,12 @@ class Order(models.Model):
         (open, 'open'),
         (closed, 'closed')
     )
-    created_by = models.ForeignKey(Client, on_delete=models.CASCADE)
+    created_by = models.ForeignKey(Client, on_delete=models.CASCADE, related_name='creator')
     bounty = models.FloatField(default=0)
     title = models.CharField(default='', max_length=25)
     description = models.TextField(default='',)
     type = models.CharField(max_length=2,
                             choices=order_status,
                             default=closed)
-    created_by = models.ForeignKey(Client)
+    executed_by = models.ForeignKey(Client, related_name='executor')
     commission = models.ForeignKey(Commission)
