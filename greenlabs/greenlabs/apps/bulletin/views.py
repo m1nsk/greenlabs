@@ -63,7 +63,10 @@ def order_form(request):
                     user = User.objects.get(id=request.user.id)
                     created_by = Client.objects.get(user=user.id)
                     commission_value = 10
-                    commission = Commission.objects.create(value=commission_value)
+                    commission, created = Commission.objects.get_or_create(
+                        id=1,
+                        defaults={'value': commission_value}
+                    )
                     order_status = 'open'
                     title = form.cleaned_data.get('title')
                     description = form.cleaned_data.get('description')
