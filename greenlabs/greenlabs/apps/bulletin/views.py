@@ -1,11 +1,12 @@
 from django.http import HttpResponse
 from django.contrib.auth import login, authenticate
 from django.shortcuts import render, redirect
-from .forms import ClientForm
-from .models import Client, MoneyAccount
+from .forms import ClientForm, OrderForm
+from .models import Client, MoneyAccount, Order, Commission
 from django.db import IntegrityError, transaction
 from django.contrib.auth.forms import AuthenticationForm
 from django.http import Http404
+from django.contrib.auth.models import User
 from django.views.generic.edit import FormView
 
 # Create your views here.
@@ -26,9 +27,10 @@ def registration(request):
                     raw_password = form.cleaned_data.get('password1')
                     user = authenticate(username=user.username, password=raw_password)
                     login(request, user)
-                    return redirect('order_list')
             except IntegrityError:
                 raise Http404
+            else:
+                return redirect('order_list')
     else:
         form = ClientForm
     return render(request, 'registration.html', {'form': form})
@@ -49,9 +51,28 @@ class UserLogin(FormView):
 
 
 def order_list(request):
-    print(request.user.username, '2111111111111111111111111111111111111')
     return HttpResponse('order_list')
 
 
 def order_form(request):
-    return HttpResponse('order_form')
+    if request.method == 'POST':
+        form = OrderForm(request.POST)
+        if form.is_valid():
+            try:
+                with transaction.atomic():
+                    user = User.objects.get(id=request.user.id)
+                    created_by = Client.objects.get(user=user.id)
+                    commission_value = 10
+                    commission = Commission.objects.create(value=commission_value)
+                    order_status = 'open'
+                    title = form.cleaned_data.get('title')
+                    description = form.cleaned_data.get('description')
+                    bounty = form.cleaned_data.get('bounty')
+                    Order.objects.create(created_by=created_by, status=order_status, commission=commission, title=title, description=description, bounty=bounty)
+            except IntegrityError:
+                raise Http404
+            else:
+                return redirect('order_list')
+    else:
+        form = OrderForm
+    return render(request, 'registration.html', {'form': form})

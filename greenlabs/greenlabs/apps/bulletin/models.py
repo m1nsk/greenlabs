@@ -51,11 +51,11 @@ class Order(models.Model):
     bounty = models.FloatField(default=0)
     title = models.CharField(default='', max_length=25)
     description = models.TextField(default='',)
-    type = models.CharField(max_length=2,
+    status = models.CharField(max_length=2,
                             choices=order_status,
                             blank=False,
                             default=closed)
-    executed_by = models.ForeignKey(Client, related_name='executor')
+    executed_by = models.ForeignKey(Client, related_name='executor', null=True, blank=True)
     commission = models.ForeignKey(Commission)
 
     def __str__(self):

@@ -16,7 +16,7 @@ class ClientInline(admin.StackedInline):
 
 
 class OrderAdmin(admin.ModelAdmin):
-    list_display = ['created_by', 'bounty', 'title', 'description', 'type', 'executed_by', 'commission']
+    list_display = ['created_by', 'bounty', 'title', 'description', 'status', 'executed_by', 'commission']
 
 
 class ClientAdmin(admin.ModelAdmin):
