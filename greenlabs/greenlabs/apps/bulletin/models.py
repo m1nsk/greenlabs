@@ -7,7 +7,7 @@ class Commission(models.Model):
     value = models.IntegerField()
 
     def __str__(self):
-        return str(self.comission)
+        return str(self.value)
 
 
 class MoneyAccount(models.Model):
@@ -32,6 +32,9 @@ class Client(models.Model):
                             default=customer)
     money_account = models.ForeignKey(MoneyAccount, on_delete=models.CASCADE)
 
+    def __str__(self):
+        return str(self.name)
+
 
 class Order(models.Model):
     open = 'OP'
@@ -40,7 +43,7 @@ class Order(models.Model):
         (open, 'open'),
         (closed, 'closed')
     )
-    created_by = models.ForeignKey(Client, on_delete=models.CASCADE, related_name='creator')
+    created_by = models.ForeignKey(Client, on_delete=models.CASCADE, related_name='customer')
     bounty = models.FloatField(default=0)
     title = models.CharField(default='', max_length=25)
     description = models.TextField(default='',)
@@ -49,3 +52,6 @@ class Order(models.Model):
                             default=closed)
     executed_by = models.ForeignKey(Client, related_name='executor')
     commission = models.ForeignKey(Commission)
+
+    def __str__(self):
+        return str(self.title)

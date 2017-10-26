@@ -2,8 +2,13 @@ from django.contrib import admin
 from .models import Commission, MoneyAccount, Order, Client
 
 
-class OrderInline(admin.StackedInline):
+class CommissionInline(admin.StackedInline):
+    model = Commission
+
+
+class OrderInline(admin.TabularInline):
     model = Order
+    fk_name = 'created_by'
 
 
 class ClientInline(admin.StackedInline):
@@ -16,23 +21,14 @@ class OrderAdmin(admin.ModelAdmin):
 
 class ClientAdmin(admin.ModelAdmin):
     list_display = ['id', 'name', 'type', 'money_account']
-    inlines = [
-        OrderInline
-    ]
 
 
 class CommissionAdmin(admin.ModelAdmin):
     list_display = ['id', 'value']
-    inlines = [
-        OrderInline
-    ]
 
 
 class MoneyAccountAdmin(admin.ModelAdmin):
     list_display = ['id', 'amount']
-    inlines = [
-        ClientInline
-    ]
 
 
 admin.site.register(Commission, CommissionAdmin)
