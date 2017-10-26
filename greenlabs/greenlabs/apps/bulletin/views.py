@@ -1,10 +1,11 @@
 from django.http import HttpResponse
-from django.contrib.auth import login, authenticate
+from django.contrib.auth import login, authenticate, logout
 from django.shortcuts import render, redirect
 from .forms import ClientForm, OrderForm
 from .models import Client, MoneyAccount, Order, Commission
 from django.db import IntegrityError, transaction
 from django.contrib.auth.forms import AuthenticationForm
+from django.contrib.auth.decorators import login_required
 from django.http import Http404
 from django.contrib.auth.models import User
 from django.views.generic.edit import FormView
@@ -50,10 +51,17 @@ class UserLogin(FormView):
         return super(UserLogin, self).form_valid(form)
 
 
+def logout_view(request):
+    logout(request)
+    return redirect('login')
+
+
+@login_required
 def order_list(request):
     return HttpResponse('order_list')
 
 
+@login_required
 def order_form(request):
     if request.method == 'POST':
         form = OrderForm(request.POST)
