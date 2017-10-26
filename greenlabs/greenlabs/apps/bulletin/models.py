@@ -1,10 +1,12 @@
 from __future__ import unicode_literals
-
+from django.contrib.auth.models import User
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 from django.db import models
 
 
 class Commission(models.Model):
-    value = models.IntegerField()
+    value = models.IntegerField(default=0)
 
     def __str__(self):
         return str(self.value)
@@ -26,8 +28,10 @@ class Client(models.Model):
         (executor, 'executor'),
         (admin, 'admin'),
     )
-    name = models.CharField(max_length=25)
+
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
     type = models.CharField(max_length=4,
+                            blank=False,
                             choices=CLIENT_TYPES,
                             default=customer)
     money_account = models.ForeignKey(MoneyAccount, on_delete=models.CASCADE)
@@ -49,6 +53,7 @@ class Order(models.Model):
     description = models.TextField(default='',)
     type = models.CharField(max_length=2,
                             choices=order_status,
+                            blank=False,
                             default=closed)
     executed_by = models.ForeignKey(Client, related_name='executor')
     commission = models.ForeignKey(Commission)

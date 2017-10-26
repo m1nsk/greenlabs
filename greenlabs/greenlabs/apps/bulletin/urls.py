@@ -1,9 +1,9 @@
 from django.conf.urls import url
-from .views import login, order_form, order_list
+from .views import UserLogin, order_form, order_list, registration
 
 urlpatterns = [
-    url(r'^login/$', login),
-    url(r'^registration/$', registration),
-    url(r'^orders/$', order_list),
-    url(r'^orders/form/$', order_form),
+    url(r'^login/$', UserLogin.as_view()),
+    url(r'^registration/$', registration, name='registration'),
+    url(r'^orders/$', order_list, name='order_list'),
+    url(r'^orders/form/$', order_form, name='order_form'),
 ]

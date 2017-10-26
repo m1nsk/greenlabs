@@ -20,7 +20,7 @@ class OrderAdmin(admin.ModelAdmin):
 
 
 class ClientAdmin(admin.ModelAdmin):
-    list_display = ['id', 'name', 'type', 'money_account']
+    list_display = ['id', 'type', 'money_account', 'user']
 
 
 class CommissionAdmin(admin.ModelAdmin):
