@@ -1,14 +1,26 @@
-<h2>Order form</h2>
-<form method="post">
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Create order</title>
+</head>
+<body>
+{% load bootstrap3 %}
+
+{% bootstrap_css %}
+{% bootstrap_javascript %}
+
+{% bootstrap_messages %}
+<div style="width: 300px; height: 200px; margin: 0 auto; padding-top: 100px">
+  <form action="" method="post" class="form">
     {% csrf_token %}
-    {% for field in form %}
-    <p>
-        {{ field.label_tag }}<br>
-        {{ field }}
-        {% for error in field.errors %}
-    <p style="color: red">{{ error }}</p>
-    {% endfor %}
-    </p>
-    {% endfor %}
-    <button type="submit">create order</button>
-</form>
+    {% bootstrap_form form %}
+    <input type="hidden" name="next" value="/bulletin/orders/" />
+    {% buttons %}
+    <button type="submit" class="btn btn-primary">
+      {% bootstrap_icon "star" %} Post order
+    </button>
+    {% endbuttons %}
+  </form>
+</div>
+</body>
+</html>

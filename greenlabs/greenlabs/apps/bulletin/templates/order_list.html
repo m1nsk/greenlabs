@@ -1,22 +1,33 @@
-<!DOCTYPE html>
-
-<body>
+{% extends "base.html" %}
+{% block menu %}
+<ul>
+    <li><a href="/bulletin/orders">Order list</a></li>
+    {% if client == 'CUST' %}
+    <li><a href="/bulletin/orders/form">Create new Order</a></li>
+    {% endif %}
+    <li><a href="/bulletin/registration/">Registration</a></li>
+    <li><a href="/bulletin/logout/">Logout</a></li>
+</ul>
+{% endblock %}
+{% block content %}
 <table border="1" style="border-collapse: collapse">
     <caption>Open Orders</caption>
     <tr>
         <th>Title</th>
         <th>Description</th>
         <th>Bounty</th>
+        <th>Customer</th>
+        <th>Take order</th>
     </tr>
     {% for item in order_list %}
     <tr>
         <td>{{item.title}}</td>
         <td>{{item.description}}</td>
         <td>{{item.bounty}}</td>
-        <td><a href="{{item.id}}"><button>Take order</button></a></td>
+        <td>{{item.created_by.user.username}}</td>
+        <td><a href="{{item.id}}"><button style="height: 100%; width: 100%">Take order</button></a></td>
     </tr>
     {% endfor %}
 </table>
-</body>
-</html>
+{% endblock %}
 

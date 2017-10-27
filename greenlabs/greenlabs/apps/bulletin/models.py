@@ -41,11 +41,11 @@ class Client(models.Model):
 
 
 class Order(models.Model):
-    opened = 'OP'
-    closed = 'CL'
+    OPENED = 'OP'
+    CLOSED = 'CL'
     order_status = (
-        (opened, 'opened'),
-        (closed, 'closed')
+        (OPENED, 'opened'),
+        (CLOSED, 'closed')
     )
     created_by = models.ForeignKey(Client, on_delete=models.CASCADE, related_name='customer')
     bounty = models.FloatField(default=0)
@@ -54,7 +54,7 @@ class Order(models.Model):
     status = models.CharField(max_length=2,
                             choices=order_status,
                             blank=False,
-                            default=closed)
+                            default=CLOSED)
     executed_by = models.ForeignKey(Client, related_name='executor', null=True, blank=True)
     commission = models.ForeignKey(Commission)
 

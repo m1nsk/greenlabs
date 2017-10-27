@@ -28,3 +28,9 @@ class ClientForm(UserCreationForm):
     class Meta:
         model = User
         fields = ('username', 'password1', 'password2', 'type', 'amount')
+        help_texts = {
+            'username': None,
+            'email': None,
+            'password1': None,
+            'password2': None,
+        }

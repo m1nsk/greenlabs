@@ -1,2 +1,16 @@
+{% extends "base.html" %}
+{% block menu %}
+<ul>
+    <li><a href="/bulletin/orders">Order list</a></li>
+    {% if client == 'CUST' %}
+    <li><a href="/bulletin/orders/form">Create new Order</a></li>
+    {% endif %}
+    <li><a href="/bulletin/registration/">Registration</a></li>
+    <li><a href="/bulletin/logout/">Logout</a></li>
+</ul>
+{% endblock %}
+{% block content %}
 <h2>Sorry, but order has been closed. Click redirect button to see updated order list</h2>
 <a href="/bulletin/orders/"><button>Order list</button></a>
+{% endblock %}
+

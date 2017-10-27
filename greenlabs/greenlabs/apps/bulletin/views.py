@@ -1,14 +1,10 @@
-from django.http import HttpResponse
-from django.contrib.auth import login, authenticate, logout
+from django.contrib.auth import login, authenticate
 from django.shortcuts import render, redirect, get_object_or_404
 from .forms import ClientForm, OrderForm
 from .models import Client, MoneyAccount, Order, Commission
 from django.db import IntegrityError, transaction
-from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.decorators import login_required
 from django.http import Http404
-from django.contrib.auth.models import User
-from django.views.generic.edit import FormView
 
 # Create your views here.
 
@@ -39,12 +35,17 @@ def registration(request):
 
 @login_required
 def order_list(request):
-    if request.method == 'GET':
-        orders = Order.objects.filter(status='OP')
-        context = {
-            'order_list': orders
-        }
-        return render(request, 'order_list.html', context)
+    try:
+        with transaction.atomic():
+            orders = Order.objects.select_related('created_by').filter(status=Order.OPENED)
+            client = Client.objects.get(user=request.user)
+            context = {
+                'order_list': orders,
+                'client': client.type
+            }
+            return render(request, 'order_list.html', context)
+    except IntegrityError:
+        raise Http404
 
 
 @login_required
@@ -54,14 +55,13 @@ def order_form(request):
         if form.is_valid():
             try:
                 with transaction.atomic():
-                    user = User.objects.get(id=request.user.id)
-                    created_by = Client.objects.get(user=user.id)
+                    created_by = Client.objects.get(user=request.user)
                     commission_value = 10
                     commission, created = Commission.objects.get_or_create(
                         id=1,
                         defaults={'value': commission_value}
                     )
-                    order_status = 'OP'
+                    order_status = Order.OPENED
                     title = form.cleaned_data.get('title')
                     description = form.cleaned_data.get('description')
                     bounty = form.cleaned_data.get('bounty')
@@ -72,7 +72,7 @@ def order_form(request):
                 return redirect('order_list')
     else:
         form = OrderForm
-    return render(request, 'registration.html', {'form': form})
+    return render(request, 'order_form.html', {'form': form})
 
 
 @login_required
@@ -81,11 +81,10 @@ def take_order(request, order_id):
         try:
             with transaction.atomic():
                 order = get_object_or_404(Order, pk=order_id)
-                if order.status == 'CL':
+                if order.status == Order.CLOSED:
                     return redirect('order_closed')
-                order.status = 'CL'
-                user = User.objects.get(id=request.user.id)
-                executed_by = Client.objects.get(user=user)
+                order.status = Order.CLOSED
+                executed_by = Client.objects.get(user=request.user)
                 order.executed_by = executed_by
                 order.save()
         except IntegrityError:

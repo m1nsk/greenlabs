@@ -1,14 +1,32 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <title>Вход</title>
-  </head>
-  <body>
-    <form action="" method="post">
-      {% csrf_token %}
-      {{ form.as_p }}
-      <input type="hidden" name="next" value="/bulletin/orders/" />
-      <button type="submit">Зарегистрироваться</button>
-    </form>
-  </body>
+<head>
+  <title>Login</title>
+</head>
+<body>
+{% load bootstrap3 %}
+
+{% bootstrap_css %}
+{% bootstrap_javascript %}
+
+{% bootstrap_messages %}
+<div style="width: 300px; height: 200px; margin: 0 auto; padding-top: 100px">
+  <form action="" method="post" class="form">
+    {% csrf_token %}
+    {% bootstrap_form form %}
+    <input type="hidden" name="next" value="/bulletin/orders/" />
+    {% buttons %}
+    <button type="submit" class="btn btn-primary">
+      {% bootstrap_icon "star" %} Enter
+    </button>
+    {% endbuttons %}
+  </form>
+  {% buttons %}
+  <button type="submit" class="btn btn-primary">
+    {% bootstrap_icon "star" %}
+    <a href="/bulletin/registration" style="color: white">Registration</a>
+  </button>
+  {% endbuttons %}
+</div>
+</body>
 </html>
