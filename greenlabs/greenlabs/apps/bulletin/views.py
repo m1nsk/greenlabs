@@ -44,7 +44,6 @@ def order_list(request):
         context = {
             'order_list': orders
         }
-        print(context)
         return render(request, 'order_list.html', context)
 
 
@@ -83,9 +82,8 @@ def take_order(request, order_id):
             with transaction.atomic():
                 order = get_object_or_404(Order, pk=order_id)
                 if order.status == 'CL':
-                    redirect('order_closed')
+                    return redirect('order_closed')
                 order.status = 'CL'
-                print(request.user.id)
                 user = User.objects.get(id=request.user.id)
                 executed_by = Client.objects.get(user=user)
                 order.executed_by = executed_by
@@ -98,4 +96,5 @@ def take_order(request, order_id):
 
 @login_required
 def order_closed(request):
+    print('closed')
     return render(request, 'order_closed.html')
