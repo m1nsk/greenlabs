@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+
+<body>
+<table border="1" style="border-collapse: collapse">
+    <caption>Open Orders</caption>
+    <tr>
+        <th>Title</th>
+        <th>Description</th>
+        <th>Bounty</th>
+    </tr>
+    {% for item in order_list %}
+    <tr>
+        <td>{{item.title}}</td>
+        <td>{{item.description}}</td>
+        <td>{{item.bounty}}</td>
+        <td><a href="{{item.id}}"><button>Take order</button></a></td>
+    </tr>
+    {% endfor %}
+</table>
+</body>
+</html>
+

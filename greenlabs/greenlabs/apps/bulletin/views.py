@@ -1,6 +1,6 @@
 from django.http import HttpResponse
 from django.contrib.auth import login, authenticate, logout
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from .forms import ClientForm, OrderForm
 from .models import Client, MoneyAccount, Order, Commission
 from django.db import IntegrityError, transaction
@@ -37,28 +37,15 @@ def registration(request):
     return render(request, 'registration.html', {'form': form})
 
 
-class UserLogin(FormView):
-    form_class = AuthenticationForm
-
-    template_name = "login.html"
-
-    success_url = "/bulletin/orders"
-
-    def form_valid(self, form):
-        self.user = form.get_user()
-
-        login(self.request, self.user)
-        return super(UserLogin, self).form_valid(form)
-
-
-def logout_view(request):
-    logout(request)
-    return redirect('login')
-
-
 @login_required
 def order_list(request):
-    return HttpResponse('order_list')
+    if request.method == 'GET':
+        orders = Order.objects.filter(status='OP')
+        context = {
+            'order_list': orders
+        }
+        print(context)
+        return render(request, 'order_list.html', context)
 
 
 @login_required
@@ -75,7 +62,7 @@ def order_form(request):
                         id=1,
                         defaults={'value': commission_value}
                     )
-                    order_status = 'open'
+                    order_status = 'OP'
                     title = form.cleaned_data.get('title')
                     description = form.cleaned_data.get('description')
                     bounty = form.cleaned_data.get('bounty')
@@ -87,3 +74,28 @@ def order_form(request):
     else:
         form = OrderForm
     return render(request, 'registration.html', {'form': form})
+
+
+@login_required
+def take_order(request, order_id):
+    if request.method == 'GET':
+        try:
+            with transaction.atomic():
+                order = get_object_or_404(Order, pk=order_id)
+                if order.status == 'CL':
+                    redirect('order_closed')
+                order.status = 'CL'
+                print(request.user.id)
+                user = User.objects.get(id=request.user.id)
+                executed_by = Client.objects.get(user=user)
+                order.executed_by = executed_by
+                order.save()
+        except IntegrityError:
+            raise Http404
+        else:
+            return redirect('order_list')
+
+
+@login_required
+def order_closed(request):
+    return render(request, 'order_closed.html')

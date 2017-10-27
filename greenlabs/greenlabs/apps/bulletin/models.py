@@ -37,14 +37,14 @@ class Client(models.Model):
     money_account = models.ForeignKey(MoneyAccount, on_delete=models.CASCADE)
 
     def __str__(self):
-        return str(self.name)
+        return str(self.user.username)
 
 
 class Order(models.Model):
-    open = 'OP'
+    opened = 'OP'
     closed = 'CL'
     order_status = (
-        (open, 'open'),
+        (opened, 'opened'),
         (closed, 'closed')
     )
     created_by = models.ForeignKey(Client, on_delete=models.CASCADE, related_name='customer')
