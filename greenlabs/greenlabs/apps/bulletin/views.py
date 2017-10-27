@@ -84,8 +84,18 @@ def take_order(request, order_id):
                 if order.status == Order.CLOSED:
                     return redirect('order_closed')
                 order.status = Order.CLOSED
-                executed_by = Client.objects.get(user=request.user)
-                order.executed_by = executed_by
+                creator = order.created_by
+                executor = Client.objects.get(user=request.user)
+                order.executed_by = executor
+                bounty = order.bounty
+                bulletin_bounty = bounty * order.commission.value / 100
+                executor_bounty = bounty - bulletin_bounty
+                creator_account = creator.money_account
+                executor_account = executor.money_account
+                creator_account.amount -= bounty
+                executor_account.amount += executor_bounty
+                creator_account.save()
+                executor_account.save()
                 order.save()
         except IntegrityError:
             raise Http404
