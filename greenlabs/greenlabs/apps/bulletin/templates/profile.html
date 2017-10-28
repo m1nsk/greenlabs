@@ -4,21 +4,32 @@
 {% endblock %}
 {% block content %}
 <table border="1" style="border-collapse: collapse">
-    <caption>Open Orders</caption>
+    <caption>Profile</caption>
+    <tr>
+        <th>Username</th>
+        <th>Type</th>
+        <th>Money amount</th>
+    </tr>
+    <tr>
+        <td>{{client.user.username}}</td>
+        <td>{{client.type}}</td>
+        <td>{{client.money_account.amount}}</td>
+    </tr>
+</table>
+<table border="1" style="border-collapse: collapse">
+    <caption>Your orders</caption>
     <tr>
         <th>Title</th>
         <th>Description</th>
         <th>Bounty</th>
-        <th>Customer</th>
-        <th>Take order</th>
+        <th>Status</th>
     </tr>
     {% for item in order_list %}
     <tr>
         <td>{{item.title}}</td>
         <td>{{item.description}}</td>
         <td>{{item.bounty}}</td>
-        <td>{{item.created_by.user.username}}</td>
-        <td><a href="{{item.id}}"><button style="height: 100%; width: 100%">Take order</button></a></td>
+        <td>{{item.status}}</td>
     </tr>
     {% endfor %}
 </table>

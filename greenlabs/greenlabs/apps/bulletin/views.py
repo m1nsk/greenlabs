@@ -6,8 +6,6 @@ from django.db import IntegrityError, transaction
 from django.contrib.auth.decorators import login_required
 from django.http import Http404
 
-# Create your views here.
-
 
 def registration(request):
     if request.method == 'POST':
@@ -37,11 +35,11 @@ def registration(request):
 def order_list(request):
     try:
         with transaction.atomic():
-            orders = Order.objects.select_related('created_by').filter(status=Order.OPENED)
             client = Client.objects.get(user=request.user)
+            orders = Order.objects.select_related('created_by').filter(status=Order.OPENED).exclude(created_by=client)
             context = {
                 'order_list': orders,
-                'client': client.type
+                'type': client.type
             }
             return render(request, 'order_list.html', context)
     except IntegrityError:
@@ -86,14 +84,10 @@ def take_order(request, order_id):
                 order.status = Order.CLOSED
                 creator = order.created_by
                 executor = Client.objects.get(user=request.user)
+                if creator.id == executor.id:
+                    return redirect('order_forbidden')
                 order.executed_by = executor
-                bounty = order.bounty
-                bulletin_bounty = bounty * order.commission.value / 100
-                executor_bounty = bounty - bulletin_bounty
-                creator_account = creator.money_account
-                executor_account = executor.money_account
-                creator_account.amount -= bounty
-                executor_account.amount += executor_bounty
+                creator_account, executor_account = change_money_accounts(creator, executor, order)
                 creator_account.save()
                 executor_account.save()
                 order.save()
@@ -103,7 +97,38 @@ def take_order(request, order_id):
             return redirect('order_list')
 
 
+def change_money_accounts(creator, executor, order):
+    bounty = order.bounty
+    bulletin_bounty = bounty * order.commission.value / 100
+    executor_bounty = bounty - bulletin_bounty
+    creator_account = creator.money_account
+    executor_account = executor.money_account
+    creator_account.amount -= bounty
+    executor_account.amount += executor_bounty
+    return creator_account, executor_account
+
+
 @login_required
 def order_closed(request):
-    print('closed')
     return render(request, 'order_closed.html')
+
+
+@login_required
+def order_forbidden(request):
+    return render(request, 'order_forbidden.html')
+
+
+@login_required
+def profile(request):
+    try:
+        with transaction.atomic():
+            client = Client.objects.get(user=request.user)
+            order_list = Order.objects.filter(created_by=client)
+            context = {
+                'client': client,
+                'order_list': order_list,
+                'type': client.type
+            }
+            return render(request, 'profile.html', context)
+    except IntegrityError:
+        raise Http404
