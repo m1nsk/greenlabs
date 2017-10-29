@@ -30,20 +30,20 @@ class MoneyAccount(models.Model):
 
 
 class Client(models.Model):
-    customer = 'CUST'
-    executor = 'EXEC'
-    admin = 'ADMIN'
+    CUSTOMER = 'CUST'
+    EXECUTOR = 'EXEC'
+    ADMIN = 'ADMN'
     CLIENT_TYPES = (
-        (customer, 'customer'),
-        (executor, 'executor'),
-        (admin, 'admin'),
+        (CUSTOMER, 'customer'),
+        (EXECUTOR, 'executor'),
+        (ADMIN, 'admin'),
     )
 
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     type = models.CharField(max_length=4,
                             blank=False,
                             choices=CLIENT_TYPES,
-                            default=customer)
+                            default=CUSTOMER)
     money_account = models.ForeignKey(MoneyAccount, on_delete=models.CASCADE)
 
     def __str__(self):

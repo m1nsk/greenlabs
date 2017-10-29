@@ -16,6 +16,6 @@ urlpatterns = [
     url(r'^orders/(?P<order_id>\d+)$', take_order, name='take_order'),
     url(r'^orders/form/$', order_form, name='order_form'),
     url(r'^orders/closed/$', order_closed, name='order_closed'),
-    url(r'^orders/forbidden/$', order_closed, name='order_forbidden'),
+    url(r'^orders/forbidden/$', order_forbidden, name='order_forbidden'),
     url(r'^profile/$', profile, name='profile'),
 ]
