@@ -17,7 +17,7 @@ def registration_service(form, request):
 
 def order_list_data_service(request):
     client = Client.objects.get(user=request.user)
-    orders = Order.objects.select_related('created_by').filter(status=Order.OPENED).exclude(created_by=client)
+    orders = Order.objects.select_related('created_by').filter(status=Order.OPENED)
     context = {
         'order_list': orders,
         'type': client.type
