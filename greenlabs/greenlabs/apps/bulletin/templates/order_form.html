@@ -3,6 +3,12 @@
 {% include "menu.html" %}
 {% endblock %}
 {% block content %}
+{% load bootstrap3 %}
+
+{% bootstrap_css %}
+{% bootstrap_javascript %}
+
+{% bootstrap_messages %}
 <div style="width: 300px; height: 200px; margin: 0 auto; padding-top: 100px">
   <form action="" method="post" class="form">
     {% csrf_token %}
@@ -16,4 +22,5 @@
   </form>
 </div>
 {% endblock %}
+
 

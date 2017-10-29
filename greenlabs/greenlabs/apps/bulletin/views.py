@@ -73,12 +73,18 @@ def take_order(request, order_id):
 
 @login_required
 def order_closed(request):
-    return render(request, 'order_closed.html')
+    context = {
+        'message': 'Sorry, but order has been closed. Click redirect button to see updated order list'
+    }
+    return render(request, 'message_page.html', context)
 
 
 @login_required
 def order_forbidden(request):
-    return render(request, 'order_forbidden.html')
+    context = {
+        'message': 'It seems to be like you are trying to take your own order. Sorry, but this action is forbidden'
+    }
+    return render(request, 'message_page.html', context)
 
 
 @login_required
