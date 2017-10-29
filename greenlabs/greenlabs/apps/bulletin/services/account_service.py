@@ -61,10 +61,7 @@ def take_order_service(order_id, request):
     if creator.id == executor.id:
         raise SelfOrderException
     order.executed_by = executor
-    creator_account, executor_account = bounty_count(creator, executor, order)
-    creator_account.save()
-    executor_account.save()
-    order.save()
+    bounty_count(creator, executor, order)
 
 
 def bounty_count(creator, executor, order):
@@ -75,7 +72,9 @@ def bounty_count(creator, executor, order):
     executor_account = executor.money_account
     creator_account.amount -= bounty
     executor_account.amount += executor_bounty
-    return creator_account, executor_account
+    creator_account.save()
+    executor_account.save()
+    order.save()
 
 
 def user_is_executor(user):

@@ -1,8 +1,7 @@
 from django.test import Client
 from django.test import TestCase
-from django.http import Http404
-from ..models import Client
-from ..services.account_service import user_is_creator, user_is_executor
+from django.contrib.auth.models import User
+from ..services.account_service import user_is_creator, user_is_executor,
 
 
 class AccordanceAnonymousTestCase(TestCase):
@@ -19,72 +18,33 @@ class AccordanceAnonymousTestCase(TestCase):
         c = Client()
         self.assertEqual(c.get('/bulletin/registration/').status_code, 200)
 
-    def test_order_list_success(self):
-        c = Client()
-        self.assertEqual(c.get('/bulletin/orders/').status_code, 404)
-
-    def test_order_form_success(self):
-        c = Client()
-        self.te(c.get('/bulletin/orders/form').status_code, 404)
-
-    def test_profile_success(self):
-        c = Client()
-        self.te(c.get('/bulletin/profile').status_code, 404)
-
-    def test_order_take_fail(self):
-        c = Client()
-        self.te(c.get('/bulletin/orders/0').status_code, 404)
-
 
 class AccordanceCreatorTestCase(TestCase):
     fixtures = ['fixtures.json']
+    user = User.objects.get(username='creator1')
 
     def setUp(self):
         c = Client()
         c.login(username='creator1', password='password123')
 
     def test_user_is_creator_success(self):
-        self.assertEqual(user_is_creator(), True)
+        self.assertEqual(user_is_creator(self.user), True)
 
     def test_user_is_executor_fail(self):
-        self.assertEqual(user_is_executor(), False)
-
-    def test_order_list_success(self):
-        c = Client()
-        self.assertEqual(c.get('/bulletin/orders/').status_code, 200)
-
-    def test_order_form_success(self):
-        c = Client()
-        self.te(c.get('/bulletin/orders/form').status_code, 200)
-
-    def test_profile_success(self):
-        c = Client()
-        self.te(c.get('/bulletin/profile').status_code, 200)
-
-    def test_order_take_fail(self):
-        c = Client()
-        self.te(c.get('/bulletin/orders/0').status_code, 404)
+        self.assertEqual(user_is_executor(self.user), False)
 
 
 class AccordanceExecutorTestCase(TestCase):
     fixtures = ['fixtures.json']
+    user = User.objects.get(username='executor1')
 
     def setUp(self):
         c = Client()
         c.login(username='executor1', password='password123')
 
-    def test_order_list_success(self):
-        c = Client()
-        self.assertEqual(c.get('/bulletin/orders/').status_code, 200)
+    def test_user_is_executor_success(self):
+        self.assertEqual(user_is_executor(self.user), True)
 
-    def test_order_form_fail(self):
-        c = Client()
-        self.te(c.get('/bulletin/orders/form').status_code, 404)
+    def test_user_is_creator_fail(self):
+        self.assertEqual(user_is_creator(self.user), False)
 
-    def test_profile_success(self):
-        c = Client()
-        self.te(c.get('/bulletin/profile').status_code, 200)
-
-    def test_order_take_success(self):
-        c = Client()
-        self.te(c.get('/bulletin/orders/0').status_code, 200)
