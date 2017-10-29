@@ -4,49 +4,80 @@ from django.http import Http404
 from ..models import Client
 
 
-class AccordanceTestCase(TestCase):
+class AccordanceAnonymousTestCase(TestCase):
     fixtures = ['fixtures.json']
+
     def setUp(self):
         pass
 
-    def test_catalog_fine(self):
+    def test_login_success(self):
         c = Client()
-        response = c.get('/api/catalog/', {'categories': '1'})
-        old_rusty_sword_of_weak_flag = False
-        balalaika_flag = False
-        for item in response.context['object_list']:
-            if item.name == 'old rusty sword of weak':
-                old_rusty_sword_of_weak_flag = True
-            else:
-                if item.name == 'Balalaika':
-                    balalaika_flag = True
-        self.assertTrue(old_rusty_sword_of_weak_flag and balalaika_flag)
+        self.assertEqual(c.get('/bulletin/login/').status_code, 200)
 
-    def test_catalog_fail(self):
+    def test_registration_success(self):
         c = Client()
-        response = c.get('/api/catalog/', {'categories': '1'})
-        old_rusty_sword_of_weak_flag = False
-        balalaika_flag = False
-        for item in response.context['object_list']:
-            if item.name == 'old rusty sword of weak':
-                old_rusty_sword_of_weak_flag = True
-            else:
-                if item.name == 'Balalaika':
-                    balalaika_flag = True
-        self.assertFalse(not old_rusty_sword_of_weak_flag or not balalaika_flag)
+        self.assertEqual(c.get('/bulletin/registration/').status_code, 200)
 
-    def test_catalog_filter_limit(self):
+    def test_order_list_success(self):
         c = Client()
-        response = c.get('/api/catalog/', {'limit': '3'})
-        self.assertTrue(len(response.context['object_list']) == 3)
+        self.assertEqual(c.get('/bulletin/orders/').status_code, 404)
 
-    def test_catalog_filter_offset(self):
+    def test_order_form_success(self):
         c = Client()
-        response = c.get('/api/catalog/', {'offset': '3'})
-        self.assertTrue(len(response.context['object_list']) == 3)
+        self.te(c.get('/bulletin/orders/form').status_code, 404)
 
-    def test_catalog_none_parameters(self):
+    def test_profile_success(self):
         c = Client()
-        response = c.get('/api/catalog/')
-        self.assertTrue(len(response.context['object_list']) == 6)
+        self.te(c.get('/bulletin/profile').status_code, 404)
 
+    def test_order_take_fail(self):
+        c = Client()
+        self.te(c.get('/bulletin/orders/0').status_code, 404)
+
+
+class AccordanceCreatorTestCase(TestCase):
+    fixtures = ['fixtures.json']
+
+    def setUp(self):
+        c = Client()
+        c.login(username='creator1', password='password123')
+
+    def test_order_list_success(self):
+        c = Client()
+        self.assertEqual(c.get('/bulletin/orders/').status_code, 200)
+
+    def test_order_form_success(self):
+        c = Client()
+        self.te(c.get('/bulletin/orders/form').status_code, 200)
+
+    def test_profile_success(self):
+        c = Client()
+        self.te(c.get('/bulletin/profile').status_code, 200)
+
+    def test_order_take_fail(self):
+        c = Client()
+        self.te(c.get('/bulletin/orders/0').status_code, 404)
+
+
+class AccordanceExecutorTestCase(TestCase):
+    fixtures = ['fixtures.json']
+
+    def setUp(self):
+        c = Client()
+        c.login(username='executor1', password='password123')
+
+    def test_order_list_success(self):
+        c = Client()
+        self.assertEqual(c.get('/bulletin/orders/').status_code, 200)
+
+    def test_order_form_fail(self):
+        c = Client()
+        self.te(c.get('/bulletin/orders/form').status_code, 404)
+
+    def test_profile_success(self):
+        c = Client()
+        self.te(c.get('/bulletin/profile').status_code, 200)
+
+    def test_order_take_success(self):
+        c = Client()
+        self.te(c.get('/bulletin/orders/0').status_code, 200)
