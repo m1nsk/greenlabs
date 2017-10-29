@@ -34,5 +34,5 @@ pip install -r requirements.txt
 #Тестирование
 
 ```
-./manage.py test apps.bulletin.tests.tests
+./manage.py test apps.bulletin.tests.test
 ```

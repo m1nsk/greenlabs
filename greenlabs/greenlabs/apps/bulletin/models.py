@@ -21,7 +21,7 @@ class MoneyAccount(models.Model):
     amount = models.FloatField(
         default=0,
         validators=[
-            MinValueValidator(0)
+            MinValueValidator(0),
         ]
     )
 
@@ -58,7 +58,11 @@ class Order(models.Model):
         (CLOSED, 'closed')
     )
     created_by = models.ForeignKey(Client, on_delete=models.CASCADE, related_name='customer')
-    bounty = models.FloatField(default=0)
+    bounty = models.FloatField(
+        default=0,
+        validators=[
+            MinValueValidator(0),
+        ])
     title = models.CharField(default='', max_length=25)
     description = models.TextField(default='',)
     status = models.CharField(max_length=2,
