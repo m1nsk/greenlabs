@@ -1,12 +1,10 @@
-from django.shortcuts import render, redirect, get_object_or_404
+from django.shortcuts import redirect
 from .exceptions.exceptions import SelfOrderException, OrderClosedException
 from .forms import ClientForm, OrderForm
 from .models import Client, Order
-from .services.account_service import registration_service, order_list_data_service, order_creation_service, take_order_service, profile_data_service, user_is_creator, user_is_executor
-from django.db import IntegrityError, transaction
-from django.contrib.auth.decorators import login_required, user_passes_test
-from django.http import Http404
-from django.views.generic.base import TemplateView, View, RedirectView
+from .services.account_service import registration_service, order_creation_service, take_order_service, user_is_creator, user_is_executor
+from django.db import transaction
+from django.views.generic.base import TemplateView, RedirectView
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.views.generic.detail import DetailView
 from django.views.generic.list import ListView
