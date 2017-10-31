@@ -22,10 +22,7 @@ class RegistrationView(FormView):
         try:
             with transaction.atomic():
                 registration_service(form, self.request)
-        except IntegrityError:
-            raise Http404
-        else:
-            return redirect('order_list')
+        return redirect('order_list')
 
 
 class OrderListView(LoginRequiredMixin, ListView):
@@ -49,14 +46,10 @@ class OrderFormView(UserPassesTestMixin, LoginRequiredMixin, FormView):
     form_class = OrderForm
 
     def form_valid(self, form):
-        print('order form')
         try:
             with transaction.atomic():
                 order_creation_service(form, self.request)
-        except IntegrityError:
-            raise Http404
-        else:
-            return redirect('order_list')
+        return redirect('order_list')
 
 
 class TakeOrderView(UserPassesTestMixin, LoginRequiredMixin, RedirectView):
@@ -72,10 +65,7 @@ class TakeOrderView(UserPassesTestMixin, LoginRequiredMixin, RedirectView):
                     return reverse('order_closed')
                 except SelfOrderException:
                     return reverse('order_forbidden')
-        except IntegrityError:
-            raise Http404
-        else:
-            return reverse('order_list')
+        return reverse('order_list')
 
 
 class ProfileView(LoginRequiredMixin, DetailView):
