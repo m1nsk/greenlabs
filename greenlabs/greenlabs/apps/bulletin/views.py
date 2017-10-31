@@ -80,20 +80,22 @@ class ProfileView(LoginRequiredMixin, DetailView):
 
 class OrderForbiddenView(LoginRequiredMixin, TemplateView):
     template_name = 'message_page.html'
+    MESSAGE = 'It seems to be like you are trying to take your own order. Sorry, but this action is forbidden'
 
     def get_context_data(self, **kwargs):
         context = {
-            'message': 'It seems to be like you are trying to take your own order. Sorry, but this action is forbidden'
+            'message': self.MESSAGE
         }
         return context
 
 
 class OrderClosedVIew(LoginRequiredMixin, TemplateView):
     template_name = 'message_page.html'
+    MESSAGE = 'Sorry, but order has been closed. Click redirect button to see updated order list'
 
     def get_context_data(self, **kwargs):
         context = {
-            'message': 'Sorry, but order has been closed. Click redirect button to see updated order list'
+            'message': self.MESSAGE
         }
         return context
 
