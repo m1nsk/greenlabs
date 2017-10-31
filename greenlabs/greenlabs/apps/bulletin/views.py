@@ -19,9 +19,8 @@ class RegistrationView(FormView):
     form_class = ClientForm
 
     def form_valid(self, form):
-        try:
-            with transaction.atomic():
-                registration_service(form, self.request)
+        with transaction.atomic():
+            registration_service(form, self.request)
         return redirect('order_list')
 
 
@@ -46,9 +45,8 @@ class OrderFormView(UserPassesTestMixin, LoginRequiredMixin, FormView):
     form_class = OrderForm
 
     def form_valid(self, form):
-        try:
-            with transaction.atomic():
-                order_creation_service(form, self.request)
+        with transaction.atomic():
+            order_creation_service(form, self.request)
         return redirect('order_list')
 
 
@@ -57,14 +55,13 @@ class TakeOrderView(UserPassesTestMixin, LoginRequiredMixin, RedirectView):
         return user_is_executor(self.request.user)
 
     def get_redirect_url(self, *args, **kwargs):
-        try:
-            with transaction.atomic():
-                try:
-                    take_order_service(self.kwargs['order_id'], self.request)
-                except OrderClosedException:
-                    return reverse('order_closed')
-                except SelfOrderException:
-                    return reverse('order_forbidden')
+        with transaction.atomic():
+            try:
+                take_order_service(self.kwargs['order_id'], self.request)
+            except OrderClosedException:
+                return reverse('order_closed')
+            except SelfOrderException:
+                return reverse('order_forbidden')
         return reverse('order_list')
 
 
