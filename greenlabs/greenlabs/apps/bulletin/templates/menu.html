@@ -1,6 +1,6 @@
 <ul>
     <li><a href="/bulletin/orders">Order list</a></li>
-    {% if type == 'CUST' %}
+    {% if request.user.client.type == 'CUST' %}
     <li><a href="/bulletin/orders/form">Create new Order</a></li>
     {% endif %}
     <li><a href="/bulletin/profile/">Profile</a></li>

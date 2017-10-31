@@ -1,100 +1,114 @@
-from django.contrib.auth import login, authenticate
 from django.shortcuts import render, redirect, get_object_or_404
 from .exceptions.exceptions import SelfOrderException, OrderClosedException
 from .forms import ClientForm, OrderForm
-from .models import Client, MoneyAccount, Order, Commission
+from .models import Client, Order
 from .services.account_service import registration_service, order_list_data_service, order_creation_service, take_order_service, profile_data_service, user_is_creator, user_is_executor
 from django.db import IntegrityError, transaction
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.http import Http404
+from django.views.generic.base import TemplateView, View, RedirectView
+from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
+from django.views.generic.detail import DetailView
+from django.views.generic.list import ListView
+from django.views.generic.edit import FormView
+from django.urls import reverse
 
 
-def registration(request):
-    if request.method == 'POST':
-        form = ClientForm(request.POST)
-        if form.is_valid():
-            try:
-                with transaction.atomic():
-                    registration_service(form, request)
-            except IntegrityError:
-                raise Http404
-            else:
-                return redirect('order_list')
-    else:
-        form = ClientForm
-    return render(request, 'registration.html', {'form': form})
+class RegistrationView(FormView):
+    template_name = 'registration.html'
+    form_class = ClientForm
 
-
-@login_required
-def order_list(request):
-    try:
-        with transaction.atomic():
-            context = order_list_data_service(request)
-            return render(request, 'order_list.html', context)
-    except IntegrityError:
-        raise Http404
-
-
-@login_required
-@user_passes_test(user_is_creator)
-def order_form(request):
-    if request.method == 'POST':
-        form = OrderForm(request.POST)
-        if form.is_valid():
-            try:
-                with transaction.atomic():
-                    order_creation_service(form, request)
-            except IntegrityError:
-                raise Http404
-            else:
-                return redirect('order_list')
-    else:
-        form = OrderForm
-    return render(request, 'order_form.html', {'form': form})
-
-
-@login_required
-@user_passes_test(user_is_executor)
-def take_order(request, order_id):
-    if request.method == 'GET':
+    def form_valid(self, form):
         try:
             with transaction.atomic():
-                try:
-                    take_order_service(order_id, request)
-                except OrderClosedException:
-                    return redirect('order_closed')
-                except SelfOrderException:
-                    return redirect('order_forbidden')
+                registration_service(form, self.request)
         except IntegrityError:
             raise Http404
         else:
             return redirect('order_list')
 
 
-@login_required
-def order_closed(request):
-    context = {
-        'message': 'Sorry, but order has been closed. Click redirect button to see updated order list'
-    }
-    return render(request, 'message_page.html', context)
+class OrderListView(LoginRequiredMixin, ListView):
+    model = Order
+    template_name = 'order_list.html'
+
+    def get_queryset(self):
+        return Order.objects.select_related('created_by').filter(status=Order.OPENED)
+
+    def get_context_data(self, **kwargs):
+        context = super(OrderListView, self).get_context_data(**kwargs)
+        context['type'] = self.request.user.client.type
+        return context
 
 
-@login_required
-def order_forbidden(request):
-    context = {
-        'message': 'It seems to be like you are trying to take your own order. Sorry, but this action is forbidden'
-    }
-    return render(request, 'message_page.html', context)
+class OrderFormView(UserPassesTestMixin, LoginRequiredMixin, FormView):
+    def test_func(self):
+        return user_is_creator(self.request.user)
+
+    template_name = 'order_form.html'
+    form_class = OrderForm
+
+    def form_valid(self, form):
+        print('order form')
+        try:
+            with transaction.atomic():
+                order_creation_service(form, self.request)
+        except IntegrityError:
+            raise Http404
+        else:
+            return redirect('order_list')
 
 
-@login_required
-def profile(request):
-    try:
-        with transaction.atomic():
-            context = profile_data_service(request)
-            return render(request, 'profile.html', context)
-    except IntegrityError:
-        raise Http404
+class TakeOrderView(UserPassesTestMixin, LoginRequiredMixin, RedirectView):
+    def test_func(self):
+        return user_is_executor(self.request.user)
+
+    def get_redirect_url(self, *args, **kwargs):
+        try:
+            with transaction.atomic():
+                try:
+                    take_order_service(self.kwargs['order_id'], self.request)
+                except OrderClosedException:
+                    return reverse('order_closed')
+                except SelfOrderException:
+                    return reverse('order_forbidden')
+        except IntegrityError:
+            raise Http404
+        else:
+            return reverse('order_list')
 
 
+class ProfileView(LoginRequiredMixin, DetailView):
+    model = Client
+    template_name = 'profile.html'
+
+    def get_object(self):
+        return self.request.user.client
+
+    def get_context_data(self, **kwargs):
+        context = super(ProfileView, self).get_context_data(**kwargs)
+        client = self.request.user.client
+        context['order_list'] = Order.objects.filter(created_by=client)
+        context['type'] = client.type
+        return context
+
+
+class OrderForbiddenView(LoginRequiredMixin, TemplateView):
+    template_name = 'message_page.html'
+
+    def get_context_data(self, **kwargs):
+        context = {
+            'message': 'It seems to be like you are trying to take your own order. Sorry, but this action is forbidden'
+        }
+        return context
+
+
+class OrderClosedVIew(LoginRequiredMixin, TemplateView):
+    template_name = 'message_page.html'
+
+    def get_context_data(self, **kwargs):
+        context = {
+            'message': 'Sorry, but order has been closed. Click redirect button to see updated order list'
+        }
+        return context
 

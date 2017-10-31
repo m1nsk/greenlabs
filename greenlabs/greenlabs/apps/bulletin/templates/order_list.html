@@ -10,7 +10,7 @@
         <th>Description</th>
         <th>Bounty</th>
         <th>Customer</th>
-        {% if type == 'EXEC' %}
+        {% if request.user.client.type == 'EXEC' %}
         <th>Take order</th>
         {% endif %}
     </tr>
@@ -20,7 +20,7 @@
         <td>{{item.description}}</td>
         <td>{{item.bounty}}</td>
         <td>{{item.created_by.user.username}}</td>
-        {% if type == 'EXEC' %}
+        {% if request.user.client.type == 'EXEC' %}
         <td><a href="{{item.id}}"><button style="height: 100%; width: 100%">Take order</button></a></td>
         {% endif %}
     </tr>

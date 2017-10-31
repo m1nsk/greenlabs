@@ -22,7 +22,6 @@ def order_list_data_service(request):
         'order_list': orders,
         'type': client.type
     }
-    print(orders)
     return context
 
 
